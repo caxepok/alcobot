@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace alcobot.service.Infrastructure
+﻿namespace alcobot.service.Infrastructure
 {
+    /// <summary>
+    /// Настройки приложения
+    /// </summary>
     public class AppSettings
     {
+        /// <summary>
+        /// Ключ доступа в bot api
+        /// </summary>
         public string BotApiKey { get; set; }
     }
 }

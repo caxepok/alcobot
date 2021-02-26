@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace alcobot.service.Services
 {
+    /// <inheritdoc cref="IAlcoCounterService"/>
     public class AlcoCounterService : IAlcoCounterService
     {
         private readonly ILogger _logger;
@@ -13,9 +14,14 @@ namespace alcobot.service.Services
             _logger = logger;
         }
 
-        public Task ProcessMessage(long chatId, long userId, string message)
+        public Task CreateOrUpdateChatAsync(long id, string title)
         {
-            _logger.LogInformation($"processing message: {message}");   //todo: пока для отладки, потом убрать
+            throw new System.NotImplementedException();
+        }
+
+        public Task ProcessMessageAsync(long chatId, long userId, string message)
+        {
+            _logger.LogInformation($"processing message: {message}");   // todo: пока для отладки, потом убрать
             // todo: распарсить алкоголь, положить в базу
             return Task.CompletedTask;
         }
