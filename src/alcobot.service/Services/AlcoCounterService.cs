@@ -15,6 +15,7 @@ namespace alcobot.service.Services
 
         public Task ProcessMessage(long chatId, long userId, string message)
         {
+            _logger.LogInformation($"processing message: {message}");   //todo: пока для отладки, потом убрать
             // todo: распарсить алкоголь, положить в базу
             return Task.CompletedTask;
         }
