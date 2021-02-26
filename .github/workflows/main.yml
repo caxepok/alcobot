@@ -30,7 +30,7 @@ jobs:
           context: ./src/
           file: ./src/alcobot.service/Dockerfile
           push: true
-          tags: alcodrunk_bot/service:latest
+          tags: caxepok/alcodrunk_bot/service:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
