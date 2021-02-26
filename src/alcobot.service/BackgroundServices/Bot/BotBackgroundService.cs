@@ -26,8 +26,17 @@ namespace alcobot.service.BackgroundServices.Bot
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _botClient.OnMessage += _botClient_OnMessage;
-            _botClient.StartReceiving(new UpdateType[] { UpdateType.Message, UpdateType.EditedMessage}, stoppingToken);
+            try
+            {
+                _botClient.OnMessage += _botClient_OnMessage;
+                _botClient.StartReceiving(new UpdateType[] { UpdateType.Message, UpdateType.EditedMessage }, stoppingToken);
+                _logger.LogInformation("Telegram bot client started");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to start bot client");
+                throw;
+            }
             return Task.CompletedTask;
         }
 
