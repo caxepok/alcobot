@@ -13,7 +13,7 @@ namespace alcobot.service.Services
             _logger = logger;
         }
 
-        public Task ProcessMessage(string userId, string message)
+        public Task ProcessMessage(long chatId, long userId, string message)
         {
             // todo: распарсить алкоголь, положить в базу
             return Task.CompletedTask;
