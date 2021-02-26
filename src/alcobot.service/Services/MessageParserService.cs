@@ -18,11 +18,11 @@ namespace alcobot.service.Services
             _logger = logger;
         }
 
-        public IEnumerable<Drink> ParseMessageToDrinks(string message)
+        public Drink[] ParseMessageToDrinks(string message)
         {
             // todo: наваять парсер дринков
-            // yield return new Drink() { Volume = 200, DrinkType = Enums.DrinkType.Beer };
-            return Enumerable.Empty<Drink>();
+            return new Drink[] { new Drink() { Volume = 200, DrinkType = Enums.DrinkType.Beer } };
+            // return Enumerable.Empty<Drink>();
         }
     }
 }

@@ -13,6 +13,6 @@ namespace alcobot.service.Services.Interfaces
         /// </summary>
         /// <param name="message">сообщение</param>
         /// <returns>дринки</returns>
-        IEnumerable<Drink> ParseMessageToDrinks(string message);
+        Drink[] ParseMessageToDrinks(string message);
     }
 }

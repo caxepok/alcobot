@@ -57,9 +57,14 @@ namespace alcobot.service.Services
             using var context = Context;
             if (!_drinkers.TryGetValue(userId, out var drinker))
             {
-                drinker = new Drinker() { ChatId = chatId, Id = userId, Username = username };
-                context.Drinkers.Add(drinker);
-                _logger.LogInformation($"created user, id: {userId}, username: {username}");
+                drinker = context.Drinkers.SingleOrDefault(_ => _.Id == userId);
+                if (drinker == null)
+                {
+                    drinker = new Drinker() { ChatId = chatId, Id = userId, Username = username };
+                    context.Drinkers.Add(drinker);
+                    _logger.LogInformation($"created user, id: {userId}, username: {username}");
+                }
+                _drinkers.AddOrUpdate(userId, drinker, (userId, drinker) => drinker);
             }
             // add drinks
             foreach (var drink in drinks)
