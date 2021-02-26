@@ -15,5 +15,6 @@ RUN dotnet publish "alcobot.service.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
+ENV "AppSettings:BotApiKey" "YOUR_BOT_TOKEN_HERE"
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "alcobot.service.dll"]
