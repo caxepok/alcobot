@@ -6,8 +6,9 @@ on:
     branches: [ main ]
 
 jobs:
-  environment: "alcodrunk_bot prod"
   build:
+    environment: 
+      name: 'alcodrunk_bot prod'
     runs-on: ubuntu-latest
     steps:
       - name: Check Out Repo 
