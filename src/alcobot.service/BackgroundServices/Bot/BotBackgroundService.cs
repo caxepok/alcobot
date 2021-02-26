@@ -58,7 +58,7 @@ namespace alcobot.service.BackgroundServices.Bot
                         // если бота кикнули - наверное не надо ничего делать, из базы не удалять Chat (хотя возможно при передобавлении будет новый ChatId)
                         break;
                     case MessageType.Text:
-                        await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.Text);
+                        await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
                         break;
                 }
             }

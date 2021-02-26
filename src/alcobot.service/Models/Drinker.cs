@@ -3,7 +3,7 @@
     /// <summary>
     /// Пользователь, для которого ведётся учёт выпитого
     /// </summary>
-    public class User
+    public class Drinker
     {
         public long Id { get; set; }
         public long ChatId { get; set; }
