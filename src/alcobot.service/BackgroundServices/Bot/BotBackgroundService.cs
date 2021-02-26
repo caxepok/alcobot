@@ -4,9 +4,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
 namespace alcobot.service.BackgroundServices.Bot
@@ -58,7 +60,9 @@ namespace alcobot.service.BackgroundServices.Bot
                         // если бота кикнули - наверное не надо ничего делать, из базы не удалять Chat (хотя возможно при передобавлении будет новый ChatId)
                         break;
                     case MessageType.Text:
-                        await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
+                        // detect if bot mentioned
+                        if(IsMentioned(e.Message))
+                            await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
                         break;
                 }
             }
@@ -66,6 +70,17 @@ namespace alcobot.service.BackgroundServices.Bot
             {
                 _logger.LogError(ex, "Failed to process bot message");
             }
+        }
+
+        /// <summary>
+        /// Возвращает true если бот упомянут в сообщении
+        /// </summary>
+        /// <param name="message">сообщение</param>
+        /// <returns></returns>
+        private bool IsMentioned(Message message)
+        {
+            return message.Entities.Any(_ => _.Type == MessageEntityType.Mention) &&
+                message.EntityValues.Any(_ => _ == "@alcodrunk_bot"); // todo: унести в настройки
         }
     }
 }
