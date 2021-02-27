@@ -13,6 +13,12 @@ namespace alcobot.service.Services.Interfaces
         /// </summary>
         /// <param name="message">сообщение</param>
         /// <returns>дринки</returns>
-        Drink[] ParseMessageToDrinks(string message);
+        IEnumerable<Drink> ParseMessageToDrinks(string message);
+        /// <summary>
+        /// Инициализация парсера
+        /// </summary>
+        /// <param name="volumeRegexes">регулярки объёмов</param>
+        /// <param name="alcoholes">регулярки типов алкоголя</param>
+        void Initialize(IEnumerable<VolumeRegex> volumeRegexes, IEnumerable<Alcohole> alcoholes);
     }
 }

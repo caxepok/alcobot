@@ -30,7 +30,7 @@ namespace alcobot.service.Services
         public async Task CreateOrUpdateChatAsync(long id, string title)
         {
             using var context = Context;
-            if(!_chats.TryGetValue(id, out var chat))
+            if (!_chats.TryGetValue(id, out var chat))
             {
                 chat = context.Chats.SingleOrDefault(_ => _.Id == id);
                 if (chat == null)
@@ -45,14 +45,14 @@ namespace alcobot.service.Services
             // todo: сверять название чата, и если надо обновлять его название
         }
 
-        public async Task ProcessMessageAsync(long chatId, long userId, string username, string message)
+        public async Task<string> ProcessMessageAsync(long chatId, long userId, string username, string message)
         {
             _logger.LogInformation($"processing message: {message}");   // todo: пока для отладки, потом убрать
             var now = DateTimeOffset.Now;
             // parse drinks           
             var drinks = _messageParserService.ParseMessageToDrinks(message);
             if (!drinks.Any())
-                return;
+                return null;
             // add user if not exist
             using var context = Context;
             if (!_drinkers.TryGetValue(userId, out var drinker))
@@ -74,6 +74,9 @@ namespace alcobot.service.Services
             }
             await context.AddRangeAsync(drinks);
             await context.SaveChangesAsync();
+
+            // todo: добавить сюда емоджи 🍺
+            return $"Записал: {String.Join(',', drinks.Select(_ => $"{_.DrinkType}: {_.Volume}мл"))}";
         }
 
         private AlcoDBContext Context =>

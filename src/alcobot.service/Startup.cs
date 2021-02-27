@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Linq;
 
 namespace alcobot.service
 {
@@ -25,7 +26,7 @@ namespace alcobot.service
             services.Configure<AppSettings>(_configuration.GetSection(nameof(AppSettings)));
             services.AddControllers();
             services.AddTransient<IAlcoCounterService, AlcoCounterService>();
-            services.AddTransient<IMessageParserService, MessageParserService>();
+            services.AddSingleton<IMessageParserService, MessageParserService>();
             services.AddHostedService<BotBackgroundService>();
 
             services.AddDbContext<AlcoDBContext>(options =>
@@ -39,6 +40,9 @@ namespace alcobot.service
             {
                 var dbcontext = scope.ServiceProvider.GetRequiredService<AlcoDBContext>();
                 dbcontext.Database.Migrate();
+                // initialize messsage parser
+                var messageParser = scope.ServiceProvider.GetRequiredService<IMessageParserService>();
+                messageParser.Initialize(dbcontext.VolumeRegexes.AsNoTracking().ToArray(), dbcontext.Alcoholes.AsNoTracking().ToArray());
             }
 
             if (env.IsDevelopment())

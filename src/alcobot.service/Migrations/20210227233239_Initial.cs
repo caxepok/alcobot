@@ -9,6 +9,22 @@ namespace alcobot.service.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Alcoholes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    DrinkType = table.Column<int>(type: "integer", nullable: false),
+                    AverageStrength = table.Column<decimal>(type: "numeric", nullable: false),
+                    RegExText = table.Column<string[]>(type: "text[]", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Alcoholes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Chats",
                 columns: table => new
                 {
@@ -52,10 +68,27 @@ namespace alcobot.service.Migrations
                 {
                     table.PrimaryKey("PK_Drinks", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "VolumeRegexes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RegExText = table.Column<string>(type: "text", nullable: true),
+                    Milliliters = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VolumeRegexes", x => x.Id);
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Alcoholes");
+
             migrationBuilder.DropTable(
                 name: "Chats");
 
@@ -64,6 +97,9 @@ namespace alcobot.service.Migrations
 
             migrationBuilder.DropTable(
                 name: "Drinks");
+
+            migrationBuilder.DropTable(
+                name: "VolumeRegexes");
         }
     }
 }

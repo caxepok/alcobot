@@ -61,8 +61,12 @@ namespace alcobot.service.BackgroundServices.Bot
                         break;
                     case MessageType.Text:
                         // detect if bot mentioned
-                        if(IsMentioned(e.Message))
-                            await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
+                        if (!IsMentioned(e.Message))
+                            return;
+
+                        string response = await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
+                        if (response != null)
+                            await _botClient.SendTextMessageAsync(e.Message.Chat.Id, response);
                         break;
                 }
             }

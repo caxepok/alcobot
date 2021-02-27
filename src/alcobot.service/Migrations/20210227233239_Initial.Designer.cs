@@ -10,7 +10,7 @@ using alcobot.service.Infrastructure;
 namespace alcobot.service.Migrations
 {
     [DbContext(typeof(AlcoDBContext))]
-    [Migration("20210226175039_Initial")]
+    [Migration("20210227233239_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,30 @@ namespace alcobot.service.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.3")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("alcobot.service.Models.Alcohole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("AverageStrength")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("DrinkType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("RegExText")
+                        .HasColumnType("text[]");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Alcoholes");
+                });
 
             modelBuilder.Entity("alcobot.service.Models.Chat", b =>
                 {
@@ -82,6 +106,24 @@ namespace alcobot.service.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Drinkers");
+                });
+
+            modelBuilder.Entity("alcobot.service.Models.VolumeRegex", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("Milliliters")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RegExText")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VolumeRegexes");
                 });
 #pragma warning restore 612, 618
         }

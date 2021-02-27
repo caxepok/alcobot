@@ -12,6 +12,8 @@ namespace alcobot.service.Infrastructure
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Drinker> Drinkers { get; set; }
         public DbSet<Drink> Drinks { get; set; }
+        public DbSet<VolumeRegex> VolumeRegexes { get; set; }
+        public DbSet<Alcohole> Alcoholes { get; set; }
 
         public AlcoDBContext(DbContextOptions<AlcoDBContext> options) : base(options)
         {
