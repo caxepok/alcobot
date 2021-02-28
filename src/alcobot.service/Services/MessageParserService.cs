@@ -46,6 +46,9 @@ namespace alcobot.service.Services
             // Если ничего не нашли, то можно как-то по-другому ещё
         }
 
+        public string DescribeDrink(Drink drink) =>
+            $"{_alcoholes.Single(_ => _.DrinkType == drink.DrinkType).Name} {drink.Volume} мл";
+
         private int GetVolume(string value)
         {
             if(Decimal.TryParse(value.Replace(',','.'), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var volume))

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using alcobot.service.Infrastructure;
@@ -9,9 +10,10 @@ using alcobot.service.Infrastructure;
 namespace alcobot.service.Migrations
 {
     [DbContext(typeof(AlcoDBContext))]
-    partial class AlcoDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210228195959_Moved-ChatId")]
+    partial class MovedChatId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -20,5 +20,6 @@ namespace alcobot.service.Services.Interfaces
         /// <param name="volumeRegexes">регулярки объёмов</param>
         /// <param name="alcoholes">регулярки типов алкоголя</param>
         void Initialize(IEnumerable<VolumeRegex> volumeRegexes, IEnumerable<Alcohole> alcoholes);
+        string DescribeDrink(Drink drink);
     }
 }

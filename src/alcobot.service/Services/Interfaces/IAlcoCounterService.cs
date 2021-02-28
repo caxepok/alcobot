@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 
 namespace alcobot.service.Services.Interfaces
 {
@@ -22,5 +23,12 @@ namespace alcobot.service.Services.Interfaces
         /// <param name="id">идентификатор чата</param>
         /// <param name="title">название чата</param>
         Task CreateOrUpdateChatAsync(long id, string title);
+        /// <summary>
+        /// Экспорт записанного ботом в csv
+        /// </summary>
+        /// <param name="chatId">идентификатор чата</param>
+        /// <param name="userId">идентификатор пользователя</param>
+        /// <returns>csv файл</returns>
+        Task<byte[]> ExportAsync(long chatId, long userId);
     }
 }
