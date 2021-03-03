@@ -39,13 +39,18 @@ namespace alcobot.service.Services
             var now = DateTimeOffset.Now;
             // parse drinks           
             var drinks = _messageParserService.ParseMessageToDrinks(message);
-            if (!drinks.Any())
-                // todo: писать лог нераспарсеных сообщений чтобы потом попытаться распарстить ещё раз?
-                return "Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help.";
+
             // add user if not exist
             var drinker = await GetDrinkerAsync(userId, username);
             var chat = await GetChatAsync(chatId, username);
             using var context = GetContext();
+
+            if (!drinks.Any())
+            {
+                context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = false });
+                await context.SaveChangesAsync();
+                return "Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help.";
+            }
             // add drinks
             foreach (var drink in drinks)
             {
@@ -54,6 +59,7 @@ namespace alcobot.service.Services
                 drink.Timestamp = now;
             }
             await context.AddRangeAsync(drinks);
+            context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = true });
             await context.SaveChangesAsync();
 
             // todo: добавить сюда емоджи 🍺

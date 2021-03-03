@@ -116,8 +116,8 @@ namespace alcobot.service.BackgroundServices.Bot
                 "Привет, я алкобот, помогу тебе записывать количество выпитого алкоголя. Просто присылай мне сообщения вида: \"0,5 пива\" в личку или с упоминанием в любом чате где я есть и я всё запомню ;)");
 
         private Task ProcessBotHelpCommand(long chatId) =>
-            _botClient.SendTextMessageAsync(chatId, 
-                "Пиши сначала количество алкоголя, потом тип алкоголя, например \"литр шампанского\" или \"50 виски\". Хотя можно и наоборот, например \"вина 250\" или \"пива 0.33\"");
+            _botClient.SendTextMessageAsync(chatId,
+                "Пиши сначала количество алкоголя, потом тип алкоголя, например \"литр шампанского\", \"50 виски\", \"банка пива\", \"5 стаканов рома\"");
         
         private async Task ProcessBotExportCommand(long chatId, long userId)
         {

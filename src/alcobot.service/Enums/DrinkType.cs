@@ -17,6 +17,7 @@
         Brandy = 12,
         Gin = 13,
         Liquor = 14,
-        Absinthe = 15
+        Absinthe = 15,
+        Moonshine = 777
     }
 }
