@@ -29,6 +29,10 @@ namespace alcobot.service.Models
         /// Тип выпитого
         /// </summary>
         public DrinkType DrinkType { get; set; }
+        /// <summary>
+        /// Идентификатор из каталога алкоголя
+        /// </summary>
+        public long AlcoholId { get; set; }
 
         // todo: может добавить место, где выпил?
     }

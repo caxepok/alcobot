@@ -36,7 +36,8 @@ namespace alcobot.service.tests
                     new Alcohole() { RegExText = new string[] { "водка", "водки" }, DrinkType = Enums.DrinkType.Vodka },
                     new Alcohole() { RegExText = new string[] { "ром", "рома" }, DrinkType = Enums.DrinkType.Rum },
                     new Alcohole() { RegExText = new string[] { "шампанское", "шампанского" }, DrinkType = Enums.DrinkType.Champagne },
-                    new Alcohole() { RegExText = new string[] { "чача", "чачи" }, DrinkType = Enums.DrinkType.Moonshine }
+                    new Alcohole() { RegExText = new string[] { "чача", "чачи" }, DrinkType = Enums.DrinkType.Moonshine },
+                    new Alcohole() { RegExText = new string[] { "бехеровка", "бехеровки" }, DrinkType = Enums.DrinkType.Liquor }
                 }
                 );
         }
@@ -44,7 +45,7 @@ namespace alcobot.service.tests
         [Fact]
         public void RegexTests()
         {
-            var drinks = _messageParserService.ParseMessageToDrinks("0.25 пива, 1 литр водки, 500 водки, литр водки 200 водка, 0.25 чачи, бутылка шампанского");
+            var drinks = _messageParserService.ParseMessageToDrinks("0.25 пива, 1 литр водки, 500 водки, литр водки 200 водка, 0.25 чачи, бутылка шампанского, 100 бехеровки");
             Assert.Equal(2, drinks.Count());
         }
     }

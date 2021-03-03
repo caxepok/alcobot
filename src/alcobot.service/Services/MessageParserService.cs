@@ -37,8 +37,8 @@ namespace alcobot.service.Services
                 string measure = match.Groups["measure"].Value;
                 string alcohol = match.Groups["alcohol"].Value;
                 int ml = GetVolumeInMilliliters(volume, measure);
-                DrinkType type = GetDrinkType(alcohol);
-                drinks.Add(new Drink() { DrinkType = type, Volume = ml });
+                Alcohole alcohole = GetDrinkType(alcohol);
+                drinks.Add(new Drink() { AlcoholId = alcohole.Id, DrinkType = alcohole.DrinkType, Volume = ml });
             }
             return drinks;
 
@@ -46,7 +46,7 @@ namespace alcobot.service.Services
         }
 
         public string DescribeDrink(Drink drink) =>
-            $"{_alcoholes.Single(_ => _.DrinkType == drink.DrinkType).Name} {drink.Volume} мл";
+            $"{_alcoholes.Single(_ => _.Id == drink.AlcoholId).Name} {drink.Volume} мл";
 
         private int GetVolumeInMilliliters(string volumeAsString, string measure)
         {
@@ -74,8 +74,8 @@ namespace alcobot.service.Services
             return (int)(_volumes.Single(_ => measure.StartsWith(_.RegExText)).Milliliters * volume);
         }
 
-        private DrinkType GetDrinkType(string value) =>
-            _alcoholes.Single(_ => _.RegExText.Contains(value)).DrinkType;
+        private Alcohole GetDrinkType(string value) =>
+            _alcoholes.Single(_ => _.RegExText.Contains(value));
 
         public void Initialize(IEnumerable<VolumeRegex> dbVolumes, IEnumerable<Alcohole> dbAlcoholes)
         {
