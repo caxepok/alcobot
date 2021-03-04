@@ -1,5 +1,4 @@
-﻿using alcobot.service.Enums;
-using alcobot.service.Models;
+﻿using alcobot.service.Models;
 using alcobot.service.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
@@ -36,18 +35,21 @@ namespace alcobot.service.Services
                     throw new InvalidOperationException("Невозможно определить тип алкогольного напитка");
                 string volume = match.Groups["volume"].Value;
                 string measure = match.Groups["measure"].Value;
-                
+
                 int ml = GetVolumeInMilliliters(volume, measure);
                 Alcohole alcohole = _alcoholes.Single(_ => _.RegExText.Contains(alcohol));
                 drinks.Add(new Drink() { AlcoholId = alcohole.Id, DrinkType = alcohole.DrinkType, Volume = ml });
             }
             return drinks;
-
-            // Если ничего не нашли, то можно как-то по-другому ещё
+            // todo: может если ничего не нашли, то можно как-то по-другому ещё попробовать поискать
         }
 
-        public string DescribeDrink(Drink drink) =>
-            $"{_alcoholes.Single(_ => _.Id == drink.AlcoholId).Name} {drink.Volume} мл";
+        public string DescribeDrink(Drink drink)
+        {
+            var alcohol = _alcoholes.Single(_ => _.Id == drink.AlcoholId);
+            string name = alcohol.Emoji == null ? alcohol.Name : $"{alcohol.Name} {alcohol.Emoji}";
+            return $"{name} {drink.Volume} мл";
+        }
 
         /// <summary>
         /// Возвращает объём выпитого. Если единица измерения не указана то считается что это в миллилитрах
@@ -70,7 +72,7 @@ namespace alcobot.service.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to parse volume as decimal");
+                    _logger.LogWarning(ex, $"Failed to parse volume as decimal: {volumeAsString}");
                     throw new InvalidOperationException("Невозможно определить объём алкогольного напитка");
                 }
             }
@@ -88,6 +90,11 @@ namespace alcobot.service.Services
             return (int)(_volumes.Single(_ => measureAsString.StartsWith(_.RegExText)).Milliliters * volume);
         }
 
+        /// <summary>
+        /// Инициализация сервиса
+        /// </summary>
+        /// <param name="dbVolumes">каталог объёмов</param>
+        /// <param name="dbAlcoholes">каталог алкогольных напитков</param>
         public void Initialize(IEnumerable<VolumeRegex> dbVolumes, IEnumerable<Alcohole> dbAlcoholes)
         {
             _volumes = dbVolumes;

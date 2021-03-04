@@ -17,6 +17,8 @@ namespace alcobot.service.Services
     /// <inheritdoc cref="IAlcoCounterService"/>
     public class AlcoCounterService : IAlcoCounterService
     {
+        private const string UnregonizedMessageText = "Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help.";
+
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessageParserService _messageParserService;
@@ -38,8 +40,8 @@ namespace alcobot.service.Services
         {
             _logger.LogInformation("processing message: {message}", message);
             var now = DateTimeOffset.Now;
-            IEnumerable<Drink> drinks = null;
             using var context = GetContext();
+            IEnumerable<Drink> drinks = null;
             // parse drinks           
             try
             {
@@ -47,21 +49,20 @@ namespace alcobot.service.Services
             }
             catch (Exception ex)
             {
-                context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = false });
-                await context.SaveChangesAsync();
-                return $"Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help. Exception: {ex.Message}";
+                await StoreCurrentMessage(false);
+                return $"{UnregonizedMessageText} Exception: {ex.Message}";
+            }
+
+            if (!drinks.Any())
+            {
+                await StoreCurrentMessage(false);
+                return UnregonizedMessageText;
             }
 
             // add user if not exist
             var drinker = await GetDrinkerAsync(userId, username);
             var chat = await GetChatAsync(chatId, username);
 
-            if (!drinks.Any())
-            {
-                context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = false });
-                await context.SaveChangesAsync();
-                return "Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help.";
-            }
             // add drinks
             foreach (var drink in drinks)
             {
@@ -73,8 +74,13 @@ namespace alcobot.service.Services
             context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = true });
             await context.SaveChangesAsync();
 
-            // todo: добавить сюда емоджи 🍺
             return $"Записал: {String.Join(',', drinks.Select(_ => _messageParserService.DescribeDrink(_)))}";
+
+            async Task StoreCurrentMessage(bool isRecognized)
+            {
+                context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = isRecognized });
+                await context.SaveChangesAsync();
+            }
         }
 
         public async Task<byte[]> ExportAsync(long chatId, long userId)

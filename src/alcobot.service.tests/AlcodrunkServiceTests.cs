@@ -10,7 +10,6 @@ namespace alcobot.service.tests
 {
     public class AlcodrunkServiceTests : IClassFixture<OptionsFixture>
     {
-        private readonly OptionsFixture _options;
         private readonly IMessageParserService _messageParserService;
 
         public AlcodrunkServiceTests(OptionsFixture options)

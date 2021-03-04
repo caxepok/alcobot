@@ -1,8 +1,4 @@
 ﻿using alcobot.service.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace alcobot.service.Models
 {
@@ -12,11 +8,18 @@ namespace alcobot.service.Models
     public class Alcohole
     {
         public long Id { get; set; }
+        /// <summary>
+        /// Название алкогольного напитка
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Эмоджи
+        /// </summary>
+        public string Emoji { get; set; }
         /// <summary>
         /// Тип напитка
         /// </summary>
-        public DrinkType DrinkType {get;set;}
+        public DrinkType DrinkType { get; set; }
         /// <summary>
         /// Средняя крепость алкоголя
         /// </summary>
