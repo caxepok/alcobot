@@ -103,6 +103,11 @@ namespace alcobot.service.BackgroundServices.Bot
                 await ProcessBotHelpCommand(message.Chat.Id);
                 return true;
             }
+            if (IsBotCommand(message, "/last"))
+            {
+                await ProcessBotLastCommand(message.Chat.Id, message.From.Id);
+                return true;
+            }
             if (IsBotCommand(message, "/export"))
             {
                 await ProcessBotExportCommand(message.Chat.Id, message.From.Id);
@@ -124,6 +129,12 @@ namespace alcobot.service.BackgroundServices.Bot
             byte[] data = await _alcoCounterService.ExportAsync(chatId, userId);
             InputOnlineFile file = new InputOnlineFile(new MemoryStream(data), $"Alcodunk bot export {DateTimeOffset.Now:dd.MM.yyyy HH:mm}");
             await _botClient.SendDocumentAsync(chatId, file);
+        }
+
+        private async Task ProcessBotLastCommand(long chatId, long userId)
+        {
+            // todo: 
+            throw new NotImplementedException();
         }
 
         /// <summary>

@@ -30,10 +30,14 @@ namespace alcobot.service.tests
                 new VolumeRegex() { RegExText = "поллитр", Milliliters = 500, },
                 new VolumeRegex() { RegExText = "банк", Milliliters = 500 },
                 new VolumeRegex() { RegExText = "баноч", Milliliters = 330 },
-                new VolumeRegex() { RegExText = "мл", Milliliters = 1 } },
+                new VolumeRegex() { RegExText = "штоф", Milliliters = 1229 },
+                new VolumeRegex() { RegExText = "мл", Milliliters = 1 },
+                new VolumeRegex() { RegExText = "соточк", Milliliters = 100 },
+                new VolumeRegex() { RegExText = "сотка", Milliliters = 100 } },
                 new Alcohole[] {
                     new Alcohole() { RegExText = new string[] { "пиво", "пива" }, DrinkType = Enums.DrinkType.Beer },
                     new Alcohole() { RegExText = new string[] { "водка", "водки" }, DrinkType = Enums.DrinkType.Vodka },
+                    new Alcohole() { RegExText = new string[] { "беленькой", "беленькая" }, DrinkType = Enums.DrinkType.Vodka },
                     new Alcohole() { RegExText = new string[] { "ром", "рома" }, DrinkType = Enums.DrinkType.Rum },
                     new Alcohole() { RegExText = new string[] { "шампанское", "шампанского" }, DrinkType = Enums.DrinkType.Champagne },
                     new Alcohole() { RegExText = new string[] { "чача", "чачи" }, DrinkType = Enums.DrinkType.Moonshine },
@@ -45,8 +49,21 @@ namespace alcobot.service.tests
         [Fact]
         public void RegexTests()
         {
-            var drinks = _messageParserService.ParseMessageToDrinks("0.25 пива, 1 литр водки, 500 водки, литр водки 200 водка, 0.25 чачи, бутылка шампанского, 100 бехеровки");
-            Assert.Equal(2, drinks.Count());
+            var messages = new string[]
+            {
+                "0.25 пива",
+                "1 литр водки",
+                "500 водки",
+                "литр водки",
+                "200 водка",
+                "0.25 чачи",
+                "бутылка шампанского",
+                "100 бехеровки",
+                "штоф беленькой"
+            };
+
+            var drinks = _messageParserService.ParseMessageToDrinks(string.Join(',', messages));
+            Assert.Equal(messages.Length, drinks.Count());
         }
     }
 }

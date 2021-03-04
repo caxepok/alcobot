@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -37,13 +38,23 @@ namespace alcobot.service.Services
         {
             _logger.LogInformation("processing message: {message}", message);
             var now = DateTimeOffset.Now;
+            IEnumerable<Drink> drinks = null;
+            using var context = GetContext();
             // parse drinks           
-            var drinks = _messageParserService.ParseMessageToDrinks(message);
+            try
+            {
+                drinks = _messageParserService.ParseMessageToDrinks(message);
+            }
+            catch (Exception ex)
+            {
+                context.Messages.Add(new Message() { ChatId = chatId, UserId = userId, Text = message, Timestamp = now, IsRecognized = false });
+                await context.SaveChangesAsync();
+                return $"Прости, не очень разобрался что ты там написал, давай чётче, я же бот. Хочешь примеров? Набери /help. Exception: {ex.Message}";
+            }
 
             // add user if not exist
             var drinker = await GetDrinkerAsync(userId, username);
             var chat = await GetChatAsync(chatId, username);
-            using var context = GetContext();
 
             if (!drinks.Any())
             {

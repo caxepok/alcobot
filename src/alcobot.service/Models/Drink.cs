@@ -35,5 +35,8 @@ namespace alcobot.service.Models
         public long AlcoholId { get; set; }
 
         // todo: может добавить место, где выпил?
+
+        public override string ToString() =>
+            $"{DrinkType}:{Volume}";
     }
 }

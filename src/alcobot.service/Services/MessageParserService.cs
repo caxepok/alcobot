@@ -24,20 +24,21 @@ namespace alcobot.service.Services
 
         public IEnumerable<Drink> ParseMessageToDrinks(string message)
         {
-            // 1. RegEx parser
             var full = _regexFull.Matches(message);
-            // nothing found
             if (!full.Any())
                 return Enumerable.Empty<Drink>();
 
             List<Drink> drinks = new List<Drink>();
             foreach (Match match in full)
             {
+                string alcohol = match.Groups["alcohol"].Value;
+                if (alcohol == String.Empty)
+                    throw new InvalidOperationException("Невозможно определить тип алкогольного напитка");
                 string volume = match.Groups["volume"].Value;
                 string measure = match.Groups["measure"].Value;
-                string alcohol = match.Groups["alcohol"].Value;
+                
                 int ml = GetVolumeInMilliliters(volume, measure);
-                Alcohole alcohole = GetDrinkType(alcohol);
+                Alcohole alcohole = _alcoholes.Single(_ => _.RegExText.Contains(alcohol));
                 drinks.Add(new Drink() { AlcoholId = alcohole.Id, DrinkType = alcohole.DrinkType, Volume = ml });
             }
             return drinks;
@@ -48,34 +49,44 @@ namespace alcobot.service.Services
         public string DescribeDrink(Drink drink) =>
             $"{_alcoholes.Single(_ => _.Id == drink.AlcoholId).Name} {drink.Volume} мл";
 
-        private int GetVolumeInMilliliters(string volumeAsString, string measure)
+        /// <summary>
+        /// Возвращает объём выпитого. Если единица измерения не указана то считается что это в миллилитрах
+        /// </summary>
+        /// <param name="volumeAsString">объём</param>
+        /// <param name="measureAsString">единица измерения</param>
+        /// <returns>объём в миллилитрах</returns>
+        private int GetVolumeInMilliliters(string volumeAsString, string measureAsString)
         {
-            // 1 литр пива
-            // 0.25 пива
-            // литр пива
+            if (volumeAsString == String.Empty && measureAsString == String.Empty)
+                throw new InvalidOperationException("Невозможно определить объём алкогольного напитка");
 
             decimal volume = 1;
             if (volumeAsString != String.Empty)
             {
-                volume = Decimal.Parse(volumeAsString.Replace(',', '.'), System.Globalization.NumberStyles.Float,
-                    System.Globalization.CultureInfo.InvariantCulture);
+                try
+                {
+                    volume = Decimal.Parse(volumeAsString.Replace(',', '.'), System.Globalization.NumberStyles.Float,
+                        System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to parse volume as decimal");
+                    throw new InvalidOperationException("Невозможно определить объём алкогольного напитка");
+                }
             }
 
-            if (measure == String.Empty)
+            if (measureAsString == String.Empty)
             {
                 if (volume < 1)
                     return (int)(volume * 1000);
                 return (int)volume;
             }
 
-            if (measure == "л") // хак для литров, пока и так сойдет :)
+            if (measureAsString == "л") // хак для литров, пока и так сойдет :)
                 return (int)(volume * 1000);
 
-            return (int)(_volumes.Single(_ => measure.StartsWith(_.RegExText)).Milliliters * volume);
+            return (int)(_volumes.Single(_ => measureAsString.StartsWith(_.RegExText)).Milliliters * volume);
         }
-
-        private Alcohole GetDrinkType(string value) =>
-            _alcoholes.Single(_ => _.RegExText.Contains(value));
 
         public void Initialize(IEnumerable<VolumeRegex> dbVolumes, IEnumerable<Alcohole> dbAlcoholes)
         {
