@@ -26,6 +26,7 @@ namespace alcobot.service
             services.Configure<AppSettings>(_configuration.GetSection(nameof(AppSettings)));
             services.AddControllers();
             services.AddTransient<IAlcoCounterService, AlcoCounterService>();
+            services.AddTransient<IAlcoMetricService, AlcoMetricService>();
             services.AddSingleton<IMessageParserService, MessageParserService>();
             services.AddHostedService<BotBackgroundService>();
 

@@ -13,11 +13,12 @@
         Rum = 8,
         Cognac = 9,
         Tequila = 10,
-        Smbuka = 11,
+        Sambuka = 11,
         Brandy = 12,
         Gin = 13,
         Liquor = 14,
         Absinthe = 15,
-        Moonshine = 777
+        Moonshine = 777,
+        Spirit = 1000
     }
 }

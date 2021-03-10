@@ -1,4 +1,5 @@
 ﻿using alcobot.service.Infrastructure;
+using alcobot.service.Models.API;
 using alcobot.service.Services.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace alcobot.service.BackgroundServices.Bot
 {
@@ -20,13 +22,15 @@ namespace alcobot.service.BackgroundServices.Bot
         private readonly ILogger _logger;
         private readonly TelegramBotClient _botClient;
         private readonly IAlcoCounterService _alcoCounterService;
+        private readonly IAlcoMetricService _alcoMetricService;
         private string _botUsername;
 
-        public BotBackgroundService(ILogger<BotBackgroundService> logger, IOptions<AppSettings> options, IAlcoCounterService alcoCounterService)
+        public BotBackgroundService(ILogger<BotBackgroundService> logger, IOptions<AppSettings> options, IAlcoCounterService alcoCounterService, IAlcoMetricService alcoMetricService)
         {
             _logger = logger;
             _botClient = new TelegramBotClient(options.Value.BotApiKey);
             _alcoCounterService = alcoCounterService;
+            _alcoMetricService = alcoMetricService;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,7 +40,8 @@ namespace alcobot.service.BackgroundServices.Bot
                 var me = await _botClient.GetMeAsync(stoppingToken);
                 _botUsername = $"@{me.Username}";
                 _botClient.OnMessage += _botClient_OnMessage;
-                _botClient.StartReceiving(new UpdateType[] { UpdateType.Message, UpdateType.EditedMessage }, stoppingToken);
+                _botClient.OnCallbackQuery += _botClient_OnCallbackQuery;
+                _botClient.StartReceiving(new UpdateType[] { UpdateType.Message, UpdateType.EditedMessage, UpdateType.CallbackQuery }, stoppingToken);
                 _logger.LogInformation("Telegram bot client started");
             }
             catch (Exception ex)
@@ -44,6 +49,30 @@ namespace alcobot.service.BackgroundServices.Bot
                 _logger.LogError(ex, "Failed to start bot client");
                 throw;
             }
+        }
+
+        private async void _botClient_OnCallbackQuery(object sender, Telegram.Bot.Args.CallbackQueryEventArgs e)
+        {
+            AlcoMetric metric;
+            switch(e.CallbackQuery.Data)
+            {
+                case "metrics_thisweek":
+                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.Message.From.Id);
+                    if (metric.TotalVolume == 0)
+                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на этой неделе");
+                    else
+                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, metric.Describe());
+                    break;
+                case "metrics_lastweek":
+                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.Message.From.Id);
+                    if (metric.TotalVolume == 0)
+                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на прошлой неделе");
+                    else
+                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, metric.Describe());
+                    break;
+            }
+
+            await _botClient.DeleteMessageAsync(e.CallbackQuery.Message.Chat.Id, e.CallbackQuery.Message.MessageId);
         }
 
         private async void _botClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
@@ -72,6 +101,8 @@ namespace alcobot.service.BackgroundServices.Bot
                         {
                             // detect if bot mentioned
                             if (!IsMentioned(e.Message))
+                                return;
+                            if (await IsBotCommand(e.Message))
                                 return;
                             response = await _alcoCounterService.ProcessMessageAsync(e.Message.Chat.Id, e.Message.From.Id, e.Message.From.Username, e.Message.Text);
                         }
@@ -103,14 +134,19 @@ namespace alcobot.service.BackgroundServices.Bot
                 await ProcessBotHelpCommand(message.Chat.Id);
                 return true;
             }
-            if (IsBotCommand(message, "/last"))
+            if (IsBotCommand(message, "/cancel"))
             {
-                await ProcessBotLastCommand(message.Chat.Id, message.From.Id);
+                await ProcessBotCancelCommand(message.Chat.Id, message.From.Id);
                 return true;
             }
             if (IsBotCommand(message, "/export"))
             {
                 await ProcessBotExportCommand(message.Chat.Id, message.From.Id);
+                return true;
+            }
+            if (IsBotCommand(message, "/metrics"))
+            {
+                await ProcessBotMetricsCommand(message.Chat.Id, message.From.Id);
                 return true;
             }
             return false;
@@ -131,10 +167,21 @@ namespace alcobot.service.BackgroundServices.Bot
             await _botClient.SendDocumentAsync(chatId, file);
         }
 
-        private async Task ProcessBotLastCommand(long chatId, long userId)
+        private async Task ProcessBotCancelCommand(long chatId, long userId)
         {
-            // todo: 
-            throw new NotImplementedException();
+            await _botClient.SendTextMessageAsync(chatId,
+                "упс... пока не умею, но я учусь");
+        }
+
+        private async Task ProcessBotMetricsCommand(long chatId, long userId)
+        {
+            InlineKeyboardButton[] buttons = new InlineKeyboardButton[] 
+            {
+                InlineKeyboardButton.WithCallbackData("Текущая неделя", "metrics_thisweek"), 
+                InlineKeyboardButton.WithCallbackData("Прошлая неделя", "metrics_lastweek")
+            };
+            InlineKeyboardMarkup ikm = new InlineKeyboardMarkup(buttons);
+            await _botClient.SendTextMessageAsync(chatId, "Выберите диапазон за который хотите получить метрики:", replyMarkup: ikm);
         }
 
         /// <summary>
