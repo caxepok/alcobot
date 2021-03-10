@@ -57,14 +57,14 @@ namespace alcobot.service.BackgroundServices.Bot
             switch(e.CallbackQuery.Data)
             {
                 case "metrics_thisweek":
-                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.Message.From.Id);
+                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.From.Id);
                     if (metric.TotalVolume == 0)
                         await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на этой неделе");
                     else
                         await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, metric.Describe());
                     break;
                 case "metrics_lastweek":
-                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.Message.From.Id);
+                    metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.From.Id);
                     if (metric.TotalVolume == 0)
                         await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на прошлой неделе");
                     else
