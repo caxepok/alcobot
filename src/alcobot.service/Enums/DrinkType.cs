@@ -18,6 +18,8 @@
         Gin = 13,
         Liquor = 14,
         Absinthe = 15,
+        Portwine = 16,
+        Nalewka = 17,
         Moonshine = 777,
         Spirit = 1000
     }

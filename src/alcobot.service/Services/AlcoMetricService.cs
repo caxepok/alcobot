@@ -26,16 +26,14 @@ namespace alcobot.service.Services
 
         public async Task<AlcoMetric> GetLastWeekMetrics(long userId)
         {
-            var now = DateTimeOffset.Now.Date;
-            DateTimeOffset from = now.AddDays(-(int)now.DayOfWeek - 6);
+            DateTimeOffset from = GetWeekStart(DateTimeOffset.Now.Date.AddDays(-7));
             DateTimeOffset to = from.AddDays(7);
             return await GetMetric(userId, from, to);
         }
 
         public async Task<AlcoMetric> GetThisWeekMetrics(long userId)
         {
-            var now = DateTimeOffset.Now.Date;
-            DateTimeOffset from = now.AddDays(-(int)now.DayOfWeek);
+            DateTimeOffset from = GetWeekStart(DateTimeOffset.Now.Date);
             DateTimeOffset to = from.AddDays(7);
             return await GetMetric(userId, from, to);
         }
@@ -44,7 +42,10 @@ namespace alcobot.service.Services
         {
             var dbContext = _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<AlcoDBContext>();
             List<Drink> drinks = await dbContext.Drinks.Where(_ => _.UserId == userId && _.Timestamp >= from && _.Timestamp < to).ToListAsync();
-            return new AlcoMetric(drinks);
+            return new AlcoMetric(drinks) { From = from, To = to };
         }
+
+        private DateTimeOffset GetWeekStart(DateTimeOffset date) =>
+            date.AddDays(-(date.DayOfWeek == DayOfWeek.Sunday ? 6 : ((int)date.DayOfWeek - 1)));
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -54,25 +55,31 @@ namespace alcobot.service.BackgroundServices.Bot
         private async void _botClient_OnCallbackQuery(object sender, Telegram.Bot.Args.CallbackQueryEventArgs e)
         {
             AlcoMetric metric;
-            switch(e.CallbackQuery.Data)
+            switch (e.CallbackQuery.Data)
             {
                 case "metrics_thisweek":
                     metric = await _alcoMetricService.GetThisWeekMetrics(e.CallbackQuery.From.Id);
-                    if (metric.TotalVolume == 0)
-                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на этой неделе");
-                    else
-                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, metric.Describe());
                     break;
                 case "metrics_lastweek":
                     metric = await _alcoMetricService.GetLastWeekMetrics(e.CallbackQuery.From.Id);
-                    if (metric.TotalVolume == 0)
-                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, "Вы ничего не выпили на прошлой неделе");
-                    else
-                        await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, metric.Describe());
                     break;
+                default:
+                    return;
             }
 
+            await _botClient.SendTextMessageAsync(e.CallbackQuery.Message.Chat.Id, GenerateMetricsMessage());
             await _botClient.DeleteMessageAsync(e.CallbackQuery.Message.Chat.Id, e.CallbackQuery.Message.MessageId);
+
+            string GenerateMetricsMessage()
+            {
+                if (metric.TotalVolume == 0)
+                    return $"С {DateString(metric.From)} по {DateString(metric.To)} вы не употребляли акоголь, респект ;)";
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine($"С {DateString(metric.From)} по {DateString(metric.To.AddDays(-1))} вы выпили:");
+                sb.AppendLine(metric.Describe());
+                return sb.ToString();
+            }
         }
 
         private async void _botClient_OnMessage(object sender, Telegram.Bot.Args.MessageEventArgs e)
@@ -153,13 +160,13 @@ namespace alcobot.service.BackgroundServices.Bot
         }
 
         private Task ProcessBotStartCommand(long chatId) =>
-            _botClient.SendTextMessageAsync(chatId, 
+            _botClient.SendTextMessageAsync(chatId,
                 "Привет, я алкобот, помогу тебе записывать количество выпитого алкоголя. Просто присылай мне сообщения вида: \"0,5 пива\" в личку или с упоминанием в любом чате где я есть и я всё запомню ;)");
 
         private Task ProcessBotHelpCommand(long chatId) =>
             _botClient.SendTextMessageAsync(chatId,
                 "Пиши сначала количество алкоголя, потом тип алкоголя, например \"литр шампанского\", \"50 виски\", \"банка пива\", \"5 стаканов рома\"");
-        
+
         private async Task ProcessBotExportCommand(long chatId, long userId)
         {
             byte[] data = await _alcoCounterService.ExportAsync(chatId, userId);
@@ -169,15 +176,18 @@ namespace alcobot.service.BackgroundServices.Bot
 
         private async Task ProcessBotCancelCommand(long chatId, long userId)
         {
-            await _botClient.SendTextMessageAsync(chatId,
-                "упс... пока не умею, но я учусь");
+            var drink = await _alcoCounterService.DeleteLastRecordAsync(chatId, userId);
+            if (drink == null)
+                await _botClient.SendTextMessageAsync(chatId, "У Вас пока нет записей выпитого");
+            else
+                await _botClient.SendTextMessageAsync(chatId, $"Последняя запись выпитого удалена: {_alcoCounterService.DesribeDrink(drink)} ({DateString(drink.Timestamp)} {drink.Timestamp:HH:mm})");
         }
 
         private async Task ProcessBotMetricsCommand(long chatId, long userId)
         {
-            InlineKeyboardButton[] buttons = new InlineKeyboardButton[] 
+            InlineKeyboardButton[] buttons = new InlineKeyboardButton[]
             {
-                InlineKeyboardButton.WithCallbackData("Текущая неделя", "metrics_thisweek"), 
+                InlineKeyboardButton.WithCallbackData("Текущая неделя", "metrics_thisweek"),
                 InlineKeyboardButton.WithCallbackData("Прошлая неделя", "metrics_lastweek")
             };
             InlineKeyboardMarkup ikm = new InlineKeyboardMarkup(buttons);
@@ -202,5 +212,22 @@ namespace alcobot.service.BackgroundServices.Bot
             message.Entities != null &&
             message.Entities.Any(_ => _.Type == MessageEntityType.BotCommand) &&
             message.EntityValues.Any(_ => _ == command);
+
+        static string DateString(DateTimeOffset date) => date.Month switch
+        {
+            1 => $"{date.Day} января",
+            2 => $"{date.Day} февраля",
+            3 => $"{date.Day} марта",
+            4 => $"{date.Day} апреля",
+            5 => $"{date.Day} мая",
+            6 => $"{date.Day} июня",
+            7 => $"{date.Day} июля",
+            8 => $"{date.Day} августа",
+            9 => $"{date.Day} сентября",
+            10 => $"{date.Day} октября",
+            11 => $"{date.Day} ноября",
+            12 => $"{date.Day} декабря",
+            _ => throw new InvalidOperationException(),
+        };
     }
 }

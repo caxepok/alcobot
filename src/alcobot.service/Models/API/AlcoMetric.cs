@@ -46,9 +46,12 @@ namespace alcobot.service.Models.API
             DrinkType.Sambuka or
             DrinkType.Tequila or
             DrinkType.Vodka or
+            DrinkType.Spirit or
+            DrinkType.Nalewka or
             DrinkType.Wiskey => DrinkStrength.Strong,
 
             DrinkType.StrongBeer or 
+            DrinkType.Portwine or
             DrinkType.Vermouth => DrinkStrength.Medium,
 
             _ => throw new ArgumentOutOfRangeException(nameof(DrinkType)),

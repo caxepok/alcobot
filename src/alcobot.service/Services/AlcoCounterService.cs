@@ -2,6 +2,7 @@
 using alcobot.service.Models;
 using alcobot.service.Services.Interfaces;
 using CsvHelper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -83,6 +84,18 @@ namespace alcobot.service.Services
             }
         }
 
+        public async Task<Drink> DeleteLastRecordAsync(long chatId, long userId)
+        {
+            var dbContext = GetContext();
+            var drink = await dbContext.Drinks.Where(_ => _.UserId == userId).OrderByDescending(_ => _.Timestamp).FirstOrDefaultAsync();
+            if (drink == null)
+                return null;
+
+            dbContext.Drinks.Remove(drink);
+            await dbContext.SaveChangesAsync();
+            return drink;
+        }
+
         public async Task<byte[]> ExportAsync(long chatId, long userId)
         {
             using var context = GetContext();
@@ -94,6 +107,9 @@ namespace alcobot.service.Services
             await writer.FlushAsync();
             return memoryStream.ToArray();
         }
+
+        public String DesribeDrink(Drink drink) =>
+            _messageParserService.DescribeDrink(drink);
 
         /// <summary>
         /// Возвращает выпивающего из кеша\базы или создаёт нового
@@ -149,5 +165,6 @@ namespace alcobot.service.Services
         /// </summary>
         private AlcoDBContext GetContext() =>
             _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<AlcoDBContext>();
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using alcobot.service.Models;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace alcobot.service.Services.Interfaces
@@ -30,5 +31,13 @@ namespace alcobot.service.Services.Interfaces
         /// <param name="userId">идентификатор пользователя</param>
         /// <returns>csv файл</returns>
         Task<byte[]> ExportAsync(long chatId, long userId);
+        /// <summary>
+        /// Удаляет последнюю запись, внесённую пользователем
+        /// </summary>
+        /// <param name="chatId">идентификатор чата</param>
+        /// <param name="userId">идентификатор пользователя</param>
+        /// <returns>удалённая запись</returns>
+        Task<Drink> DeleteLastRecordAsync(long chatId, long userId);
+        string DesribeDrink(Drink drink);
     }
 }
